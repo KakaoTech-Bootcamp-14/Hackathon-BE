@@ -1,0 +1,154 @@
+name: KTB 해커톤 14조 CICD 파이프라인
+
+# 어떤 브랜치에서 쓰이는 지
+on:
+  push:
+    branches:
+      - develop
+
+# CICD JOBS
+jobs:
+
+  # 통합 테스트 환경 구축
+  test:
+    runs-on: ubuntu-22.04
+
+    # 통합 테스트용 컨테이너 띄우기
+    services:
+      # Mysql
+      mysql:
+        image: mysql:8.0
+        ports:
+          - '3306:3306'
+        env:
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+
+    # 스텝 실행하기
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 자바 설치하기
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Gradle 캐싱
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}
+
+      - name: application-test.yml 넣기
+        run: |
+          mkdir -p src/integrationTest/resources
+          echo "${{secrets.APPLICATION_TEST_YML}}" > ./src/integrationTest/resources/application-test.yml
+
+      - name: 통합 및 단위 테스트 진행하기
+        run: |
+          ./gradlew clean check -Dspring.profiles.active=test
+
+  # 테스트가 모두 통과했을 때만, 도커 이미지 빌드 + 푸시하기
+  build-push-image:
+    runs-on: ubuntu-22.04
+    needs: test
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker Buildx 설정
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      - name: Docker 이미지 빌드 & Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/ktb-be:latest
+            ${{ secrets.DOCKER_USERNAME }}/ktb-be:${{ github.sha }}
+
+  deploy :
+    runs-on: ubuntu-22.04
+    needs: build-push-image
+    if: success()
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v4
+
+      - name: env 생성
+        run: echo "${{ secrets.ENV }}" > .env
+
+      - name: 2. .env 파일 EC2에 전송
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: ".env"  # 방금 생성한 .env 파일
+          target: "/home/ubuntu/app/"
+
+      - name: 3. docker-compose.yml 전달
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "./deploy/docker-compose.yml"
+          target: "/home/ubuntu/app/"
+
+      - name: 4. EC2에서 docker-compose 실행
+        uses: appleboy/ssh-action@master  # SSH를 사용하여 EC2에서 명령 실행
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}  # EC2 퍼블릭 IP
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            # docker-compose 명령어 실행
+            cd /home/ubuntu/app/
+            docker compose pull
+            docker compose up -d spring
+            docker compose ps
+
+
+notify-discord:
+    runs-on: ubuntu-22.04
+    needs: deploy
+    if: always()
+    steps:
+      - name: Discord 배포 요청 알림
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_BACK_URL }}
+          title: "${{ needs.deploy.result == 'success' && '✅' || '❌' }} develop 브랜치 배포 결과"
+          description: |
+            **커밋 메시지**: ${{ github.event.head_commit.message }}
+            **작성자**: ${{ github.event.pusher.name }}
+            **브랜치**: `${{ github.ref_name }}`
+
+            **📊 빌드/배포 결과**:
+            - 상태: ${{ needs.deploy.result == 'success' && '성공' || '실패' }}
+
+            **🔗 링크**:
+            - [커밋 확인하기](${{ github.event.head_commit.url }})
+
+          color: "${{ needs.deploy.result == 'success' && 65280 || 16711680 }}"
+          username: GitHub Deploy Bot
+          avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
