@@ -1,5 +1,8 @@
 package bootcamp.kakao.server.controller;
 
+import bootcamp.kakao.server.common.dto.DataResponseDto;
+import bootcamp.kakao.server.common.dto.ResponseDto;
+import bootcamp.kakao.server.common.enums.Code;
 import bootcamp.kakao.server.dto.auth.LoginRequest;
 import bootcamp.kakao.server.dto.auth.LoginResponse;
 import bootcamp.kakao.server.dto.auth.SignUpRequest;
@@ -22,16 +25,15 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<ResponseDto> signUp(@RequestBody SignUpRequest signUpRequest) {
         authService.signUp(signUpRequest);
-        return ResponseEntity.ok(ApiResponse.success(null));
+        return ResponseEntity.ok(new ResponseDto(Code.OK.getCode(), Code.OK.getMessage()));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<DataResponseDto<LoginResponse>> login(@RequestBody LoginRequest loginRequest) {
         LoginResponse response = authService.login(loginRequest);
-
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(new DataResponseDto<>(Code.OK, response));
     }
 }
 
