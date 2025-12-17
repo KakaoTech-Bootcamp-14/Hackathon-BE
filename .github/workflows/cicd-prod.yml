@@ -50,7 +50,7 @@ jobs:
       - name: application-test.yml 넣기
         run: |
           mkdir -p src/integrationTest/resources
-          echo "${{secrets.APPLICATION_TEST_YML}}" > ./src/integrationTest/resources/application-test.yml
+          echo "${{secrets.APPLICATION_TEST_YML}}" > ./src/test/resources/application-test.yml
 
       - name: 통합 및 단위 테스트 진행하기
         run: |
@@ -95,35 +95,6 @@ jobs:
 
       - name: env 생성
         run: echo "${{ secrets.ENV }}" > .env
-
-      - name: EC2 내부 도커 설치 여부
-        id: check-docker
-        run: |
-          DOCKER_EXISTS=$(ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.EC2_PUBLIC_IP }} 'command -v docker >/dev/null && echo "true" || echo "false"')
-          echo "docker_exists=$DOCKER_EXISTS" >> $GITHUB_OUTPUT
-
-      - name: EC2 도커 설치
-        if: steps.check-docker.outputs.docker_exists == 'false'
-        run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-            sudo apt-get update
-            sudo apt-get install -y \
-              ca-certificates \
-              curl \
-              gnupg \
-              lsb-release
-            sudo mkdir -p /etc/apt/keyrings
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-              | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-            echo \
-              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-              https://download.docker.com/linux/ubuntu \
-              $(lsb_release -cs) stable" \
-              | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-            sudo apt-get update
-            sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-            sudo usermod -aG docker $USER
-          EOF
 
       - name: .env 파일 EC2에 전송
         uses: appleboy/scp-action@master
