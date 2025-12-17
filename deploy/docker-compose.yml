@@ -1,0 +1,7 @@
+services:
+
+  spring:
+    image: wpgur07/ktb-be:latest
+    container_name: zeusAI-app
+    ports:
+      - '8080:8080'
