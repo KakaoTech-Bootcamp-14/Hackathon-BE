@@ -1,5 +1,7 @@
 package bootcamp.kakao.server.client;
 
+import bootcamp.kakao.server.dto.chat.FastApiChatRequest;
+import bootcamp.kakao.server.dto.chat.FastApiChatResponse;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceSummaryRequestDto;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceSummaryResponseDto;
 import bootcamp.kakao.server.dto.schedule.FastApiChapterInfoDto;
@@ -14,6 +16,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.List;
 import java.util.Map;
@@ -110,6 +113,29 @@ public class FastApiClient {
                 .retrieve()
                 .bodyToMono(LearningSourceSummaryResponseDto.class)
                 .block();
+    }
+
+    public FastApiChatResponse chat(Long learningSourceId, String question) {
+
+        Map<String, Object> body = Map.of(
+                "study_session_id", learningSourceId.toString(),
+                "question", question
+        );
+
+        try {
+            return webClient.post()
+                    .uri(fastApiBaseUrl + "/chat")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(FastApiChatResponse.class)
+                    .block();
+
+        } catch (WebClientResponseException e) {
+            System.out.println("FastAPI /chat error status = " + e.getStatusCode());
+            System.out.println("FastAPI /chat error body = " + e.getResponseBodyAsString());
+            throw e;
+        }
     }
 
 }
