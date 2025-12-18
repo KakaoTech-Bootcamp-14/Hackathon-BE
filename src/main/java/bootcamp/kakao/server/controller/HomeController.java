@@ -25,9 +25,9 @@ public class HomeController implements HomeControllerSpec {
         return new DataResponseDto<>(Code.OK, "홈 데이터를 성공적으로 조회하였습니다.", homeResponseDto);
     }
 
-    @GetMapping("/{userId}/progress")
-    public DataResponseDto<ProgressResponseDto> getOverallProgress(@PathVariable ("userId") Long userId) {
-        ProgressResponseDto progressResponseDto = homeService.getOverallProgress(userId);
-        return new DataResponseDto<ProgressResponseDto>(Code.OK, "전체 진도율을 성공적으로 조회하였습니다.", progressResponseDto);
-    }
+//    @GetMapping("/{userId}/progress")
+//    public DataResponseDto<ProgressResponseDto> getOverallProgress(@PathVariable ("userId") Long userId) {
+//        ProgressResponseDto progressResponseDto = homeService.getOverallProgress(userId);
+//        return new DataResponseDto<ProgressResponseDto>(Code.OK, "전체 진도율을 성공적으로 조회하였습니다.", progressResponseDto);
+//    }
 }

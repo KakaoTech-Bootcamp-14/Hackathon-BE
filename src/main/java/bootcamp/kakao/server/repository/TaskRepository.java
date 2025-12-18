@@ -17,10 +17,10 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findAllByChapterIdIn(List<Long> chapterIds);
     void deleteByChapterIdIn(List<Long> chapterIds);
 
-    long countByLearningSourceId(Long learningSourceId);
-    long countByLearningSourceIdAndStatus(Long learningSourceId, TaskStatus status);
-    long countByLearningSourceUserId(Long userId);
-    long countByLearningSourceUserIdAndStatus(Long userId, TaskStatus status);
+//    long countByLearningSourceId(Long learningSourceId);
+//    long countByLearningSourceIdAndStatus(Long learningSourceId, TaskStatus status);
+//    long countByLearningSourceUserId(Long userId);
+//    long countByLearningSourceUserIdAndStatus(Long userId, TaskStatus status);
 
 
 }
