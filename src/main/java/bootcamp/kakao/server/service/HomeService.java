@@ -8,8 +8,10 @@ import bootcamp.kakao.server.domain.Task;
 import bootcamp.kakao.server.domain.User;
 import bootcamp.kakao.server.dto.home.HomeResponseDto;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceResponseDto;
+import bootcamp.kakao.server.dto.learningsource.ProgressResponseDto;
 import bootcamp.kakao.server.dto.schedule.ChapterInfoDto;
 import bootcamp.kakao.server.dto.schedule.TaskInfoDto;
+import bootcamp.kakao.server.enums.TaskStatus;
 import bootcamp.kakao.server.repository.ChapterRepository;
 import bootcamp.kakao.server.repository.LearningSourceRepository;
 import bootcamp.kakao.server.repository.TaskRepository;
@@ -122,4 +124,16 @@ public class HomeService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public ProgressResponseDto getOverallProgress(Long userId) {
+        long total = taskRepository.countByLearningSourceUserId(userId);
+        long done = taskRepository.countByLearningSourceUserIdAndStatus(userId, TaskStatus.DONE);
+        int progressRate = (total == 0) ? 0 : (int) ((done * 100L) / total);
+
+        return ProgressResponseDto.builder()
+                .totalTaskCount(total)
+                .doneTaskCount(done)
+                .progressRate(progressRate)
+                .build();
+    }
 }

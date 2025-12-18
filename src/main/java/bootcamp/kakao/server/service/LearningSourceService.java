@@ -9,8 +9,10 @@ import bootcamp.kakao.server.domain.Summary;
 import bootcamp.kakao.server.domain.Task;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceResponseDto;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceSummaryResponseDto;
+import bootcamp.kakao.server.dto.learningsource.ProgressResponseDto;
 import bootcamp.kakao.server.dto.schedule.ChapterInfoDto;
 import bootcamp.kakao.server.dto.schedule.TaskInfoDto;
+import bootcamp.kakao.server.enums.TaskStatus;
 import bootcamp.kakao.server.repository.ChapterRepository;
 import bootcamp.kakao.server.repository.LearningSourceRepository;
 import bootcamp.kakao.server.repository.SummaryRepository;
@@ -87,5 +89,18 @@ public class LearningSourceService {
         summaryRepository.save(summary);
 
         return learningSourceSummaryResponseDto;
+    }
+
+    @Transactional(readOnly = true)
+    public ProgressResponseDto getLearningSourceProgress(Long learningSourceId) {
+        long total = taskRepository.countByLearningSourceId(learningSourceId);
+        long done = taskRepository.countByLearningSourceIdAndStatus(learningSourceId, TaskStatus.DONE);
+        int progressRate = (total == 0) ? 0 : (int) ((done * 100L) / total);
+
+        return ProgressResponseDto.builder()
+                .totalTaskCount(total)
+                .doneTaskCount(done)
+                .progressRate(progressRate)
+                .build();
     }
 }

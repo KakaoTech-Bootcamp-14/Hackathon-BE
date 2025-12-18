@@ -5,6 +5,7 @@ import bootcamp.kakao.server.common.enums.Code;
 import bootcamp.kakao.server.controller.swagger.LearningSourceControllerSpec;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceResponseDto;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceSummaryResponseDto;
+import bootcamp.kakao.server.dto.learningsource.ProgressResponseDto;
 import bootcamp.kakao.server.service.LearningSourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -27,5 +28,11 @@ public class LearningSourceController implements LearningSourceControllerSpec {
                                                                                           @PathVariable ("taskId") Long taskId) {
         LearningSourceSummaryResponseDto taskLearningSourceSummaryResponseDto = learningSourceService.getLearningSourceSummary(learningSourceId, taskId);
         return new DataResponseDto<>(Code.OK, "학습 자료 요약본을 성공적으로 조회하였습니다.", taskLearningSourceSummaryResponseDto);
+    }
+
+    @GetMapping("/{learningSourceId}/progress")
+    public DataResponseDto<ProgressResponseDto> getLearningSourceProgress(@PathVariable ("learningSourceId") Long learningSourceId) {
+        ProgressResponseDto progressResponseDto = learningSourceService.getLearningSourceProgress(learningSourceId);
+        return new DataResponseDto<ProgressResponseDto>(Code.OK, "학습 자료의 진도율을 성공적으로 조회하였습니다.",  progressResponseDto);
     }
 }
