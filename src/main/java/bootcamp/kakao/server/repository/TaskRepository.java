@@ -14,13 +14,17 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
     List<Task> findAllByStudyPlanId(Long studyPlanId);
+    List<Task> findAllByChapterId(Long chapterId);
     List<Task> findAllByChapterIdIn(List<Long> chapterIds);
+    List<Task> findAllByChapter_LearningSourceId(Long learningSourceId);
     void deleteByChapterIdIn(List<Long> chapterIds);
 
-//    long countByLearningSourceId(Long learningSourceId);
-//    long countByLearningSourceIdAndStatus(Long learningSourceId, TaskStatus status);
-//    long countByLearningSourceUserId(Long userId);
-//    long countByLearningSourceUserIdAndStatus(Long userId, TaskStatus status);
+    long countByChapterId(Long chapterId);
+    long countByChapterIdAndStatus(Long chapterId, TaskStatus status);
+    long countByChapter_LearningSourceId(Long learningSourceId);
+    long countByChapter_LearningSourceIdAndStatus(Long learningSourceId, TaskStatus status);
+    long countByChapter_LearningSource_UserId(Long userId);
+    long countByChapter_LearningSource_UserIdAndStatus(Long userId, TaskStatus status);
 
 
 }

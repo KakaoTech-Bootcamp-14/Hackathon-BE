@@ -121,19 +121,30 @@ public class LearningSourceService {
         return learningSourceSummaryResponseDto;
     }
 
-//    @Transactional(readOnly = true)
-//    public ProgressResponseDto getLearningSourceProgress(Long learningSourceId) {
-//        long total = taskRepository.countByLearningSourceId(learningSourceId);
-//        long done = taskRepository.countByLearningSourceIdAndStatus(learningSourceId, TaskStatus.DONE);
-//        int progressRate = (total == 0) ? 0 : (int) ((done * 100L) / total);
-//
-//        return ProgressResponseDto.builder()
-//                .totalTaskCount(total)
-//                .doneTaskCount(done)
-//                .progressRate(progressRate)
-//                .build();
-//    }
-  
+    @Transactional(readOnly = true)
+    public ProgressResponseDto getLearningSourceProgress(Long learningSourceId) {
+        long total = taskRepository.countByChapter_LearningSourceId(learningSourceId);
+        long done = taskRepository.countByChapter_LearningSourceIdAndStatus(learningSourceId, TaskStatus.DONE);
+        int progressRate = (total == 0) ? 0 : (int) ((done * 100L) / total);
+
+        return ProgressResponseDto.builder()
+                .totalTaskCount(total)
+                .doneTaskCount(done)
+                .progressRate(progressRate)
+                .build();
+    }
+
+    @Transactional
+    public void completeAllTasksByLearningSourceId(Long learningSourceId) {
+        List<Task> tasks = taskRepository.findAllByChapter_LearningSourceId(learningSourceId);
+
+        if (tasks.isEmpty()) {
+            throw new GeneralException(Code.NOT_FOUND);
+        }
+
+        tasks.forEach(task -> task.updateStatus(TaskStatus.DONE));
+    }
+
     @Transactional
     public void deleteLearningSource(Long learningSourceId) {
         LearningSource learningSource = learningSourceRepository.findById(learningSourceId)
