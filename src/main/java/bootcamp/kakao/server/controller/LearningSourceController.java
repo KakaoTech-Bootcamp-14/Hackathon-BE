@@ -8,6 +8,7 @@ import bootcamp.kakao.server.dto.learningsource.LearningSourceResponseDto;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceSummaryResponseDto;
 import bootcamp.kakao.server.dto.learningsource.ProgressResponseDto;
 import bootcamp.kakao.server.service.LearningSourceService;
+import bootcamp.kakao.server.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class LearningSourceController implements LearningSourceControllerSpec {
 
     private final LearningSourceService learningSourceService;
+    private final TaskService taskService;
 
     @GetMapping("/{learningSourceId}")
     public DataResponseDto<LearningSourceResponseDto> getLearningSourceChapter(@PathVariable ("learningSourceId") Long learningSourceId) {
@@ -41,5 +43,11 @@ public class LearningSourceController implements LearningSourceControllerSpec {
     public ResponseDto deleteLearningSource(@PathVariable("learningSourceId") Long learningSourceId) {
         learningSourceService.deleteLearningSource(learningSourceId);
         return new ResponseDto(Code.OK.getCode(), "학습 자료가 성공적으로 삭제되었습니다.");
+    }
+
+    @PatchMapping("/{learningSourceId}/tasks/complete-all")
+    public ResponseDto completeAllTasks(@PathVariable("learningSourceId") Long learningSourceId) {
+        taskService.completeAllTasksByLearningSourceId(learningSourceId);
+        return new ResponseDto(Code.OK.getCode(), "모든 학습 Task가 성공적으로 완료 처리되었습니다.");
     }
 }

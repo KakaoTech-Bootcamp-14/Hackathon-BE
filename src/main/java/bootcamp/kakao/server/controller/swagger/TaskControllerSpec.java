@@ -28,4 +28,13 @@ public interface TaskControllerSpec {
             )
             @RequestBody TaskCompletionRequestDto request
     );
+
+    @Operation(
+            summary = "챕터의 모든 할 일 완료 처리",
+            description = "특정 챕터에 속한 모든 Task의 상태를 DONE으로 일괄 변경합니다."
+    )
+    ResponseDto completeAllTasksByChapter(
+            @Parameter(description = "Chapter ID", example = "1")
+            @PathVariable("chapterId") Long chapterId
+    );
 }

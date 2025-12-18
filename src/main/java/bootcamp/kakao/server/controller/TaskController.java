@@ -28,4 +28,10 @@ public class TaskController implements TaskControllerSpec {
         taskService.updateCompletionStatus(taskId, request.getStatus());
         return new ResponseDto(Code.OK.getCode(), "Task 상태가 성공적으로 업데이트되었습니다.");
     }
+
+    @PatchMapping("/chapter/{chapterId}/complete-all")
+    public ResponseDto completeAllTasksByChapter(@PathVariable("chapterId") Long chapterId) {
+        taskService.completeAllTasksByChapterId(chapterId);
+        return new ResponseDto(Code.OK.getCode(), "챕터의 모든 학습 Task가 성공적으로 완료 처리되었습니다.");
+    }
 }

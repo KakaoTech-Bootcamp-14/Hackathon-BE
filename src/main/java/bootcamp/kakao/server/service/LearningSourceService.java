@@ -98,8 +98,8 @@ public class LearningSourceService {
 
     @Transactional(readOnly = true)
     public ProgressResponseDto getLearningSourceProgress(Long learningSourceId) {
-        long total = taskRepository.countByLearningSourceId(learningSourceId);
-        long done = taskRepository.countByLearningSourceIdAndStatus(learningSourceId, TaskStatus.DONE);
+        long total = taskRepository.countByChapter_LearningSourceId(learningSourceId);
+        long done = taskRepository.countByChapter_LearningSourceIdAndStatus(learningSourceId, TaskStatus.DONE);
         int progressRate = (total == 0) ? 0 : (int) ((done * 100L) / total);
 
         return ProgressResponseDto.builder()

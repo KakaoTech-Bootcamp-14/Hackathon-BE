@@ -126,8 +126,8 @@ public class HomeService {
 
     @Transactional(readOnly = true)
     public ProgressResponseDto getOverallProgress(Long userId) {
-        long total = taskRepository.countByLearningSourceUserId(userId);
-        long done = taskRepository.countByLearningSourceUserIdAndStatus(userId, TaskStatus.DONE);
+        long total = taskRepository.countByChapter_LearningSource_UserId(userId);
+        long done = taskRepository.countByChapter_LearningSource_UserIdAndStatus(userId, TaskStatus.DONE);
         int progressRate = (total == 0) ? 0 : (int) ((done * 100L) / total);
 
         return ProgressResponseDto.builder()

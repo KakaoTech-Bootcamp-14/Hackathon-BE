@@ -41,4 +41,13 @@ public interface LearningSourceControllerSpec {
             @Parameter(description = "학습 자료 ID", example = "1")
             @PathVariable("learningSourceId") Long learningSourceId
     );
+
+    @Operation(
+            summary = "학습 자료의 모든 Task 완료 처리",
+            description = "특정 학습 자료에 속한 모든 Task의 상태를 DONE으로 일괄 변경합니다."
+    )
+    ResponseDto completeAllTasks(
+            @Parameter(description = "학습 자료 ID", example = "1")
+            @PathVariable("learningSourceId") Long learningSourceId
+    );
 }

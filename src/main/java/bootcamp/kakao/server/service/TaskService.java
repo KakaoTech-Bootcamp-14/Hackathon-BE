@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -31,6 +33,30 @@ public class TaskService {
                 : TaskStatus.TODO;
 
         task.updateStatus(nextStatus);
+    }
+
+    @Transactional
+    /// LearningSource의 모든 Task를 완료 처리
+    public void completeAllTasksByLearningSourceId(Long learningSourceId) {
+        List<Task> tasks = taskRepository.findAllByChapter_LearningSourceId(learningSourceId);
+
+        if (tasks.isEmpty()) {
+            throw new GeneralException(Code.NOT_FOUND);
+        }
+
+        tasks.forEach(task -> task.updateStatus(TaskStatus.DONE));
+    }
+
+    @Transactional
+    /// Chapter의 모든 Task를 완료 처리
+    public void completeAllTasksByChapterId(Long chapterId) {
+        List<Task> tasks = taskRepository.findAllByChapterId(chapterId);
+
+        if (tasks.isEmpty()) {
+            throw new GeneralException(Code.NOT_FOUND);
+        }
+
+        tasks.forEach(task -> task.updateStatus(TaskStatus.DONE));
     }
 
 }
