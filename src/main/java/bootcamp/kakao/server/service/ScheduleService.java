@@ -138,6 +138,8 @@ public class ScheduleService {
         }
 
         return CreateScheduleResponseDto.builder()
+                .learningSourceId(learningSource.getId())
+                .learningSourceTitle(learningSource.getTitle())
                 .chapterInfoDtos(responseChapters)
                 .build();
     }
@@ -177,8 +179,6 @@ public class ScheduleService {
         if (remainingTaskTitles.isEmpty()) {
             return null;
         }
-
-        // ===== 🔥 FK 에러 방지 핵심 수정 =====
 
         // 6. 기존 chapter 조회
         List<Chapter> oldChapters =
@@ -264,6 +264,8 @@ public class ScheduleService {
         }
 
         return CreateScheduleResponseDto.builder()
+                .learningSourceId(learningSource.getId())
+                .learningSourceTitle(learningSource.getTitle())
                 .chapterInfoDtos(responseChapters)
                 .build();
     }
