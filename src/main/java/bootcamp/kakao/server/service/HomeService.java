@@ -119,6 +119,7 @@ public class HomeService {
                         .toList();
 
         return LearningSourceResponseDto.builder()
+                .learningSourceId(learningSource.getId())
                 .learningSourceTitle(learningSource.getTitle())
                 .chapterInfoDtos(chapterDtos)
                 .build();

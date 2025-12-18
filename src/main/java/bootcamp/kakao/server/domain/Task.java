@@ -33,6 +33,7 @@ public class Task {
     private Integer sortOrder;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
     @Builder

@@ -152,41 +152,49 @@ public class ScheduleService {
         // 2. StudyPlan 조회
         StudyPlan studyPlan = studyPlanRepository.findByLearningSourceId(learningSourceId);
 
-        // 3. 변경된 StudyPlan 업데이트
-        studyPlan.update(createScheduleRequestDto.getStartDate(), createScheduleRequestDto.getEndDate(), createScheduleRequestDto.isExcludeWeekend(), createScheduleRequestDto.getDailyStudyTime());
+        // 3. StudyPlan 업데이트
+        studyPlan.update(
+                createScheduleRequestDto.getStartDate(),
+                createScheduleRequestDto.getEndDate(),
+                createScheduleRequestDto.isExcludeWeekend(),
+                createScheduleRequestDto.getDailyStudyTime()
+        );
 
         // 4. 기존 Task 조회
         List<Task> tasks = taskRepository.findAllByStudyPlanId(studyPlan.getId());
 
-        // 5. 완료/미완료 task 분리
-        List<Task> completedTasks = tasks.stream()
+        // 5. 완료 / 미완료 task 분리 (FastAPI 전달용)
+        List<String> completedTaskTitles = tasks.stream()
                 .filter(task -> task.getStatus() == TaskStatus.DONE)
+                .map(Task::getTitle)
                 .toList();
 
-        List<Task> remainingTasks = tasks.stream()
+        List<String> remainingTaskTitles = tasks.stream()
                 .filter(task -> task.getStatus() != TaskStatus.DONE)
+                .map(Task::getTitle)
                 .toList();
 
-        if (remainingTasks.isEmpty()) {
-            return null; // 재배치할 스케줄 없음
+        if (remainingTaskTitles.isEmpty()) {
+            return null;
         }
 
-        // 4. 완료된 Task, 남은 Task title만 추출 (FastAPI로 보낼 데이터)
-        List<String> completedTaskTitles = completedTasks.stream()
-                .map(Task::getTitle)
+        // ===== 🔥 FK 에러 방지 핵심 수정 =====
+
+        // 6. 기존 chapter 조회
+        List<Chapter> oldChapters =
+                chapterRepository.findAllByLearningSourceId(learningSourceId);
+
+        // 7. chapter에 속한 task 전부 삭제
+        List<Long> chapterIds = oldChapters.stream()
+                .map(Chapter::getId)
                 .toList();
 
-        List<String> remainingTaskTitles = remainingTasks.stream()
-                .map(Task::getTitle)
-                .toList();
+        taskRepository.deleteByChapterIdIn(chapterIds);
 
-        // 5. 기존 미완료 Task 삭제
-        taskRepository.deleteAll(remainingTasks);
+        // 8. chapter 삭제
+        chapterRepository.deleteAll(oldChapters);
 
-        // 6. 기존 Chapter 중 미완료 부분 제거
-        chapterRepository.deleteByLearningSourceId(learningSourceId);
-
-        // 7. 남은 날짜 계산
+        // 9. 남은 날짜 계산
         LocalDate newStartDate = LocalDate.now();
         LocalDate newEndDate = createScheduleRequestDto.getEndDate();
 
@@ -198,7 +206,7 @@ public class ScheduleService {
 
         int remainingDays = studyDates.size();
 
-        // 8. FastAPI 재스케줄링 요청
+        // 10. FastAPI 재스케줄링 요청
         List<FastApiChapterInfoDto> newChapters =
                 fastApiClient.rescheduleChapters(
                         learningSourceId,
@@ -208,47 +216,43 @@ public class ScheduleService {
                         remainingTaskTitles
                 );
 
-        // 9. Chapter + Task 재생성
+        // 11. Chapter + Task 재생성
         List<ChapterInfoDto> responseChapters = new ArrayList<>();
+
         for (FastApiChapterInfoDto chapterDto : newChapters) {
 
-            LocalDate studyDate =
-                    studyDates.get(chapterDto.getChapterOrder() - 1);
+            LocalDate studyDate = studyDates.get(chapterDto.getChapterOrder() - 1);
 
-            // Chapter 엔티티 생성
             Chapter chapter = Chapter.createChapter(
                     chapterDto.getChapterOrder(),
                     chapterDto.getChapterTitle(),
-                    studyPlan.getLearningSource()
+                    learningSource
             );
             chapterRepository.save(chapter);
 
-            // Task 응답 DTO 리스트
             List<TaskInfoDto> responseTasks = new ArrayList<>();
-            for (FastApiTaskInfoDto fastApiTaskInfoDto : chapterDto.getTasks()) {
 
-                // Task 엔티티 생성
+            for (FastApiTaskInfoDto taskDto : chapterDto.getTasks()) {
+
                 Task task = Task.createTask(
                         studyPlan,
                         chapter,
                         studyDate,
-                        fastApiTaskInfoDto.getTaskTitle(),
-                        fastApiTaskInfoDto.getTaskOrder()
+                        taskDto.getTaskTitle(),
+                        taskDto.getTaskOrder()
                 );
                 taskRepository.save(task);
 
-                // 응답용 Task DTO
                 responseTasks.add(
                         TaskInfoDto.builder()
                                 .taskId(task.getId())
-                                .taskOrder(fastApiTaskInfoDto.getTaskOrder())
-                                .taskTitle(fastApiTaskInfoDto.getTaskTitle())
+                                .taskOrder(taskDto.getTaskOrder())
+                                .taskTitle(taskDto.getTaskTitle())
                                 .studyDate(studyDate)
                                 .build()
                 );
             }
 
-            // 응답용 Chapter DTO
             responseChapters.add(
                     ChapterInfoDto.builder()
                             .chapterId(chapter.getId())
@@ -263,6 +267,7 @@ public class ScheduleService {
                 .chapterInfoDtos(responseChapters)
                 .build();
     }
+
 
 
 

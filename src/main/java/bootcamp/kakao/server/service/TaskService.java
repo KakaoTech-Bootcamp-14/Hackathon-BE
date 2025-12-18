@@ -18,7 +18,7 @@ public class TaskService {
 
     @Transactional
     /// 더티체킹으로 DB 호출 없이 저장
-    public void updateCompletionStatus(Long taskId, TaskCompletionStatus status) {
+    public void updateCompletionStatus(Long taskId, TaskStatus status) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new GeneralException(Code.NOT_FOUND));
 
@@ -26,11 +26,7 @@ public class TaskService {
             throw new GeneralException(Code.INVALID_INPUT_VALUE);
         }
 
-        TaskStatus nextStatus = status == TaskCompletionStatus.SUCCESS
-                ? TaskStatus.DONE
-                : TaskStatus.TODO;
-
-        task.updateStatus(nextStatus);
+        task.updateStatus(status);
     }
 
 }

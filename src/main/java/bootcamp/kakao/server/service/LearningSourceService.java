@@ -76,6 +76,7 @@ public class LearningSourceService {
                 .toList();
 
         return LearningSourceResponseDto.builder()
+                .learningSourceId(learningSourceId)
                 .learningSourceTitle(learningSource.getTitle())
                 .chapterInfoDtos(chapterInfoDtos)
                 .build();
@@ -83,15 +84,39 @@ public class LearningSourceService {
 
     @Transactional
     public LearningSourceSummaryResponseDto getLearningSourceSummary(Long learningSourceId, Long taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new GeneralException(Code.NOT_FOUND));
+
+        Summary summary = summaryRepository.findSummaryByTask(task);
+        LearningSourceSummaryResponseDto learningSourceSummaryResponseDto;
+
+        if (summary != null) {
+            learningSourceSummaryResponseDto = LearningSourceSummaryResponseDto.builder()
+                    .learningSourceId(learningSourceId.toString())
+                    .taskTitle(task.getTitle())
+                    .content(summary.getContent())
+                    .build();
+        } else {
+            learningSourceSummaryResponseDto = LearningSourceSummaryResponseDto.builder()
+                    .learningSourceId("0")
+                    .taskTitle("")
+                    .content("")
+                    .build();
+        }
+
+        return learningSourceSummaryResponseDto;
+    }
+
+    @Transactional
+    public LearningSourceSummaryResponseDto getTaskLearningSourceSummaryFromFastApi(Long learningSourceId, Long taskId) {
 
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new GeneralException(Code.NOT_FOUND));
 
         LearningSourceSummaryResponseDto learningSourceSummaryResponseDto = fastApiClient.getLearningSourceSummary(learningSourceId, task.getTitle());
-
-        Summary summary = Summary.createSummary(task,
+        Summary newSummary = Summary.createSummary(task,
                 learningSourceSummaryResponseDto.getContent());
-        summaryRepository.save(summary);
+        summaryRepository.save(newSummary);
 
         return learningSourceSummaryResponseDto;
     }
