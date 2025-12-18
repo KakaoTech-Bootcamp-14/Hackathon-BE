@@ -13,6 +13,9 @@ public class CorsConfig implements WebMvcConfigurer {
     @Value("${cors.front.host}")
     private String frontHost;
 
+    @Value("${cors.front.local}")
+    private String frontLocal;
+
     @Value("${cors.back.host}")
     private String backHost;
 
