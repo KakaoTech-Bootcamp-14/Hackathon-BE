@@ -29,6 +29,7 @@ public class ScheduleService {
     private final StudyPlanRepository studyPlanRepository;
     private final ChapterRepository chapterRepository;
     private final TaskRepository taskRepository;
+    private final SummaryRepository summaryRepository;
     private final FastApiClient fastApiClient;
 
     public CreateScheduleResponseDto createSchedule(MultipartFile multipartFile, CreateScheduleRequestDto createScheduleRequestDto) {
@@ -178,35 +179,71 @@ public class ScheduleService {
             return null;
         }
 
-        // ===== 🔥 FK 에러 방지 핵심 수정 =====
+        // ===== 🔥 완료된 Task는 유지, 미완료된 Task만 삭제 후 재생성 =====
 
-        // 6. 기존 chapter 조회
-        List<Chapter> oldChapters =
-                chapterRepository.findAllByLearningSourceId(learningSourceId);
-
-        // 7. chapter에 속한 task 전부 삭제
-        List<Long> chapterIds = oldChapters.stream()
-                .map(Chapter::getId)
+        // 6. 미완료된 Task만 필터링
+        List<Task> incompleteTasks = tasks.stream()
+                .filter(task -> task.getStatus() != TaskStatus.DONE)
                 .toList();
 
-        taskRepository.deleteByChapterIdIn(chapterIds);
+        // 7. 미완료된 Task의 Summary 먼저 삭제 (FK 제약 조건 해결)
+        if (!incompleteTasks.isEmpty()) {
+            List<Long> incompleteTaskIds = incompleteTasks.stream()
+                    .map(Task::getId)
+                    .toList();
+            List<Summary> summaries = summaryRepository.findAllByTaskIdIn(incompleteTaskIds);
+            if (!summaries.isEmpty()) {
+                summaryRepository.deleteAll(summaries);
+            }
 
-        // 8. chapter 삭제
-        chapterRepository.deleteAll(oldChapters);
+            // 8. 미완료된 Task만 삭제
+            taskRepository.deleteAll(incompleteTasks);
+        }
 
-        // 9. 남은 날짜 계산
+        // 9. Task가 하나도 남지 않은 Chapter만 삭제
+        List<Chapter> allChapters = chapterRepository.findAllByLearningSourceId(learningSourceId);
+        List<Chapter> emptyChapters = new ArrayList<>();
+
+        for (Chapter chapter : allChapters) {
+            long remainingTaskCount = taskRepository.countByChapterId(chapter.getId());
+            if (remainingTaskCount == 0) {
+                emptyChapters.add(chapter);
+            }
+        }
+
+        if (!emptyChapters.isEmpty()) {
+            chapterRepository.deleteAll(emptyChapters);
+        }
+
+        // 10. 완료된 Task의 studyDate 조회 (중복 방지용)
+        List<Task> completedTasks = tasks.stream()
+                .filter(task -> task.getStatus() == TaskStatus.DONE)
+                .toList();
+
+        List<LocalDate> usedDates = completedTasks.stream()
+                .map(Task::getStudyDate)
+                .distinct()
+                .sorted()
+                .toList();
+
+        // 11. 새로운 Task를 배치할 날짜 계산 (완료된 Task 날짜 제외)
         LocalDate newStartDate = LocalDate.now();
         LocalDate newEndDate = createScheduleRequestDto.getEndDate();
 
-        List<LocalDate> studyDates = generateDates(
+        List<LocalDate> allPossibleDates = generateDates(
                 newStartDate,
                 newEndDate,
                 createScheduleRequestDto.isExcludeWeekend()
         );
 
-        int remainingDays = studyDates.size();
+        // 사용 가능한 날짜 = 전체 날짜 - 이미 사용된 날짜
+        List<LocalDate> availableDates = allPossibleDates.stream()
+                .filter(date -> !usedDates.contains(date))
+                .toList();
 
-        // 10. FastAPI 재스케줄링 요청
+        int remainingDays = availableDates.size();
+
+        // 12. FastAPI 재스케줄링 요청 (미완료된 Task만 전달)
         List<FastApiChapterInfoDto> newChapters =
                 fastApiClient.rescheduleChapters(
                         learningSourceId,
@@ -216,12 +253,12 @@ public class ScheduleService {
                         remainingTaskTitles
                 );
 
-        // 11. Chapter + Task 재생성
+        // 13. Chapter + Task 재생성 (사용 가능한 날짜에 배치)
         List<ChapterInfoDto> responseChapters = new ArrayList<>();
 
         for (FastApiChapterInfoDto chapterDto : newChapters) {
 
-            LocalDate studyDate = studyDates.get(chapterDto.getChapterOrder() - 1);
+            LocalDate studyDate = availableDates.get(chapterDto.getChapterOrder() - 1);
 
             Chapter chapter = Chapter.createChapter(
                     chapterDto.getChapterOrder(),
