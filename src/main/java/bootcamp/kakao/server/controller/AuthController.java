@@ -3,6 +3,7 @@ package bootcamp.kakao.server.controller;
 import bootcamp.kakao.server.common.dto.DataResponseDto;
 import bootcamp.kakao.server.common.dto.ResponseDto;
 import bootcamp.kakao.server.common.enums.Code;
+import bootcamp.kakao.server.controller.swagger.AuthControllerSpec;
 import bootcamp.kakao.server.dto.auth.LoginRequest;
 import bootcamp.kakao.server.dto.auth.LoginResponse;
 import bootcamp.kakao.server.dto.auth.SignUpRequest;
@@ -17,7 +18,7 @@ import java.time.Duration;
 
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController {
+public class AuthController implements AuthControllerSpec {
 
     private final AuthService authService;
 
