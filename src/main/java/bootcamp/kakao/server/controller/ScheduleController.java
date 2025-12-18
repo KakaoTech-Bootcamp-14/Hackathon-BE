@@ -2,6 +2,7 @@ package bootcamp.kakao.server.controller;
 
 import bootcamp.kakao.server.common.dto.DataResponseDto;
 import bootcamp.kakao.server.common.enums.Code;
+import bootcamp.kakao.server.controller.swagger.ScheduleControllerSpec;
 import bootcamp.kakao.server.dto.schedule.CreateScheduleRequestDto;
 import bootcamp.kakao.server.dto.schedule.CreateScheduleResponseDto;
 import bootcamp.kakao.server.service.ScheduleService;
@@ -14,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/schedule")
 @RequiredArgsConstructor
-public class ScheduleController {
+public class ScheduleController implements ScheduleControllerSpec {
 
     private final ScheduleService scheduleService;
 

@@ -2,6 +2,7 @@ package bootcamp.kakao.server.controller;
 
 import bootcamp.kakao.server.common.dto.DataResponseDto;
 import bootcamp.kakao.server.common.enums.Code;
+import bootcamp.kakao.server.controller.swagger.LearningSourceControllerSpec;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceResponseDto;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceSummaryResponseDto;
 import bootcamp.kakao.server.service.LearningSourceService;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/learning-source")
 @RequiredArgsConstructor
-public class LearningSourceController {
+public class LearningSourceController implements LearningSourceControllerSpec {
 
     private final LearningSourceService learningSourceService;
 
