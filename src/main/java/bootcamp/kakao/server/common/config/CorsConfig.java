@@ -24,6 +24,7 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/**") // 모든 엔드포인트에 적용
                 .allowedOriginPatterns(
                         frontHost,
+                        frontLocal,
                         backHost
                 )
                 .allowedMethods(
