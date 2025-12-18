@@ -4,9 +4,16 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Entity
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_study_plan_learning_source",
+                        columnNames = "learning_source_id"
+                )
+        }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StudyPlan {
@@ -29,7 +36,7 @@ public class StudyPlan {
     private boolean excludeWeekends;
 
     @Column(nullable = false)
-    private LocalTime studyTime;
+    private int studyTime;
 
     @Builder
     private StudyPlan(
@@ -37,7 +44,7 @@ public class StudyPlan {
             LocalDate startDate,
             LocalDate endDate,
             boolean excludeWeekends,
-            LocalTime studyTime
+            int studyTime
     ) {
         this.learningSource = learningSource;
         this.startDate = startDate;
@@ -51,7 +58,7 @@ public class StudyPlan {
             LocalDate startDate,
             LocalDate endDate,
             boolean excludeWeekends,
-            LocalTime studyTime
+            int studyTime
     ) {
         return StudyPlan.builder()
                 .learningSource(learningSource)
@@ -60,6 +67,14 @@ public class StudyPlan {
                 .excludeWeekends(excludeWeekends)
                 .studyTime(studyTime)
                 .build();
+    }
+
+    public void update(LocalDate startDate, LocalDate endDate, boolean excludeWeekends, int studyTime) {
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.excludeWeekends = excludeWeekends;
+        this.studyTime = studyTime;
+
     }
 }
 

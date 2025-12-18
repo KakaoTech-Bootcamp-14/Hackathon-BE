@@ -1,5 +1,6 @@
 package bootcamp.kakao.server.domain;
 
+import bootcamp.kakao.server.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,7 +33,7 @@ public class Task {
     private Integer sortOrder;
 
     @Column(nullable = false)
-    private String status;
+    private TaskStatus status;
 
     @Builder
     private Task(
@@ -41,7 +42,7 @@ public class Task {
             LocalDate studyDate,
             String title,
             Integer sortOrder,
-            String status
+            TaskStatus status
     ) {
         this.studyPlan = studyPlan;
         this.chapter = chapter;
@@ -56,8 +57,7 @@ public class Task {
             Chapter chapter,
             LocalDate studyDate,
             String title,
-            Integer sortOrder,
-            String status
+            Integer sortOrder
     ) {
         return Task.builder()
                 .studyPlan(studyPlan)
@@ -65,7 +65,7 @@ public class Task {
                 .studyDate(studyDate)
                 .title(title)
                 .sortOrder(sortOrder)
-                .status(status)
+                .status(TaskStatus.TODO)
                 .build();
     }
 }
