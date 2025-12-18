@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LearningSourceRepository extends JpaRepository<LearningSource, Long> {
+
+    LearningSource findByTitle(String title);
 }
