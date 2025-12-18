@@ -99,6 +99,7 @@ public class ScheduleService {
                 // 응답용 Task DTO 생성
                 responseTasks.add(
                         TaskInfoDto.builder()
+                                .taskId(task.getId())
                                 .taskOrder(fastApiTaskInfoDto.getTaskOrder())
                                 .taskTitle(fastApiTaskInfoDto.getTaskTitle())
                                 .studyDate(studyDate)
@@ -109,6 +110,9 @@ public class ScheduleService {
             // 응답용 Chapter DTO 생성
             responseChapters.add(
                     ChapterInfoDto.builder()
+                            .chapterId(chapter.getId())
+                            .chapterOrder(chapter.getSortOrder())
+                            .chapterTitle(chapter.getTitle())
                             .taskInfoDtos(responseTasks)
                             .build()
             );
@@ -123,7 +127,8 @@ public class ScheduleService {
     public CreateScheduleResponseDto reCreateSchedule(CreateScheduleRequestDto createScheduleRequestDto) {
 
         // 1. LearningSource 조회
-        LearningSource learningSource = learningSourceRepository.findByTitle(createScheduleRequestDto.getLearningSourceTitle());
+        LearningSource learningSource = learningSourceRepository.findByTitle(createScheduleRequestDto.getLearningSourceTitle())
+                .orElseThrow(() -> new GeneralException(Code.NOT_FOUND));
         Long learningSourceId = learningSource.getId();
 
         // 2. StudyPlan 조회
@@ -217,6 +222,7 @@ public class ScheduleService {
                 // 응답용 Task DTO
                 responseTasks.add(
                         TaskInfoDto.builder()
+                                .taskId(task.getId())
                                 .taskOrder(fastApiTaskInfoDto.getTaskOrder())
                                 .taskTitle(fastApiTaskInfoDto.getTaskTitle())
                                 .studyDate(studyDate)
@@ -227,6 +233,9 @@ public class ScheduleService {
             // 응답용 Chapter DTO
             responseChapters.add(
                     ChapterInfoDto.builder()
+                            .chapterId(chapter.getId())
+                            .chapterOrder(chapter.getSortOrder())
+                            .chapterTitle(chapter.getTitle())
                             .taskInfoDtos(responseTasks)
                             .build()
             );

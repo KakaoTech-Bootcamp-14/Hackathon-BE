@@ -1,5 +1,7 @@
 package bootcamp.kakao.server.client;
 
+import bootcamp.kakao.server.dto.learningsource.LearningSourceSummaryRequestDto;
+import bootcamp.kakao.server.dto.learningsource.LearningSourceSummaryResponseDto;
 import bootcamp.kakao.server.dto.schedule.FastApiChapterInfoDto;
 import bootcamp.kakao.server.dto.schedule.ReCreateScheduleRequestDto;
 import lombok.RequiredArgsConstructor;
@@ -92,6 +94,21 @@ public class FastApiClient {
                 .retrieve()
                 .bodyToFlux(FastApiChapterInfoDto.class)
                 .collectList()
+                .block();
+    }
+
+    public LearningSourceSummaryResponseDto getLearningSourceSummary(Long learningSourceId, String taskTitle) {
+        LearningSourceSummaryRequestDto request = LearningSourceSummaryRequestDto.builder()
+                .learningSourceId(learningSourceId.toString())
+                .taskTitle(taskTitle)
+                .build();
+
+        return webClient.post()
+                .uri(fastApiBaseUrl + "/study/material")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(LearningSourceSummaryResponseDto.class)
                 .block();
     }
 
