@@ -15,9 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -116,14 +118,7 @@ public class ScheduleService {
                 taskRepository.save(task);
 
                 // 응답용 Task DTO 생성
-                responseTasks.add(
-                        TaskInfoDto.builder()
-                                .taskId(task.getId())
-                                .taskOrder(fastApiTaskInfoDto.getTaskOrder())
-                                .taskTitle(fastApiTaskInfoDto.getTaskTitle())
-                                .studyDate(studyDate)
-                                .build()
-                );
+                responseTasks.add(TaskInfoDto.from(task));
             }
 
             // 응답용 Chapter DTO 생성
@@ -227,7 +222,8 @@ public class ScheduleService {
                 .toList();
 
         // 11. 새로운 Task를 배치할 날짜 계산 (완료된 Task 날짜 제외)
-        LocalDate newStartDate = LocalDate.now();
+        // 새롭게 지정된 시작일 기준으로 재배치
+        LocalDate newStartDate = createScheduleRequestDto.getStartDate();
         LocalDate newEndDate = createScheduleRequestDto.getEndDate();
 
         List<LocalDate> allPossibleDates = generateDates(
@@ -254,7 +250,6 @@ public class ScheduleService {
                 );
 
         // 13. Chapter + Task 재생성 (사용 가능한 날짜에 배치)
-        List<ChapterInfoDto> responseChapters = new ArrayList<>();
 
         for (FastApiChapterInfoDto chapterDto : newChapters) {
 
@@ -267,8 +262,6 @@ public class ScheduleService {
             );
             chapterRepository.save(chapter);
 
-            List<TaskInfoDto> responseTasks = new ArrayList<>();
-
             for (FastApiTaskInfoDto taskDto : chapterDto.getTasks()) {
 
                 Task task = Task.createTask(
@@ -279,26 +272,32 @@ public class ScheduleService {
                         taskDto.getTaskOrder()
                 );
                 taskRepository.save(task);
-
-                responseTasks.add(
-                        TaskInfoDto.builder()
-                                .taskId(task.getId())
-                                .taskOrder(taskDto.getTaskOrder())
-                                .taskTitle(taskDto.getTaskTitle())
-                                .studyDate(studyDate)
-                                .build()
-                );
             }
-
-            responseChapters.add(
-                    ChapterInfoDto.builder()
-                            .chapterId(chapter.getId())
-                            .chapterOrder(chapter.getSortOrder())
-                            .chapterTitle(chapter.getTitle())
-                            .taskInfoDtos(responseTasks)
-                            .build()
-            );
         }
+
+        // 14. 완료된 Task를 포함한 전체 스케줄 응답 재구성
+        List<Chapter> updatedChapters = chapterRepository.findAllByLearningSourceId(learningSourceId);
+        Map<Long, List<Task>> tasksByChapter = taskRepository.findAllByChapter_LearningSourceId(learningSourceId)
+                .stream()
+                .collect(Collectors.groupingBy(task -> task.getChapter().getId()));
+
+        List<ChapterInfoDto> responseChapters = updatedChapters.stream()
+                .sorted(Comparator.comparingInt(Chapter::getSortOrder))
+                .map(chapter -> ChapterInfoDto.builder()
+                        .chapterId(chapter.getId())
+                        .chapterOrder(chapter.getSortOrder())
+                        .chapterTitle(chapter.getTitle())
+                        .taskInfoDtos(
+                                tasksByChapter.getOrDefault(chapter.getId(), List.of())
+                                        .stream()
+                                        .sorted(Comparator
+                                                .comparing(Task::getStudyDate)
+                                                .thenComparing(Task::getSortOrder))
+                                        .map(TaskInfoDto::from)
+                                        .toList()
+                        )
+                        .build())
+                .toList();
 
         return CreateScheduleResponseDto.builder()
                 .chapterInfoDtos(responseChapters)
