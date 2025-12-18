@@ -11,4 +11,5 @@ import java.util.List;
 @Repository
 public interface ChatRepository extends JpaRepository<Chat, Long> {
     Slice<Chat> findByLearningSourceId(Long learningSourceId,  Pageable pageable);
+    void deleteByLearningSourceId(Long learningSourceId);
 }

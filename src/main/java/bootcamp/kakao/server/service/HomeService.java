@@ -35,6 +35,7 @@ public class HomeService {
     @Transactional(readOnly = true)
     public HomeResponseDto getHomeData(Long userId) {
 
+        ///  !TODO 개발 편의성을 위해 현재는 1로 고정
         User user = userRepository.findById(1L)
                 .orElseThrow(() -> new GeneralException(Code.NOT_FOUND));
 

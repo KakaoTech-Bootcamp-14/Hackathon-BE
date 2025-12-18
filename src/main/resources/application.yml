@@ -21,5 +21,6 @@ fastapi:
 cors:
   front:
     host: ${FRONT_BASE_URL}
+    local: ${FRONT_LOCAL_URL}
   back:
     host: ${BACK_BASE_URL}

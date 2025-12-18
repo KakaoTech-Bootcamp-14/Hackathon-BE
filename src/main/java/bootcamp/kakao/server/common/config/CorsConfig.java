@@ -13,6 +13,9 @@ public class CorsConfig implements WebMvcConfigurer {
     @Value("${cors.front.host}")
     private String frontHost;
 
+    @Value("${cors.front.local}")
+    private String frontLocal;
+
     @Value("${cors.back.host}")
     private String backHost;
 
@@ -21,6 +24,7 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/**") // 모든 엔드포인트에 적용
                 .allowedOriginPatterns(
                         frontHost,
+                        frontLocal,
                         backHost
                 )
                 .allowedMethods(

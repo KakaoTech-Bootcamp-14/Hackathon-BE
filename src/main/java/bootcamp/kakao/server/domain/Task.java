@@ -68,5 +68,9 @@ public class Task {
                 .status(TaskStatus.TODO)
                 .build();
     }
-}
 
+    /// 상태 변화 메서드 생성
+    public void updateStatus(TaskStatus status) {
+        this.status = status;
+    }
+}
