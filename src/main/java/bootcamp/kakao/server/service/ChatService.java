@@ -1,5 +1,6 @@
 package bootcamp.kakao.server.service;
 
+import bootcamp.kakao.server.client.FastApiClient;
 import bootcamp.kakao.server.common.enums.Code;
 import bootcamp.kakao.server.common.exception.GeneralException;
 import bootcamp.kakao.server.domain.Chat;
@@ -11,8 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -23,20 +22,17 @@ public class ChatService {
 
     private final LearningSourceRepository learningSourceRepository;
     private final ChatRepository chatRepository;
-    private final WebClient webClient;
+    private final FastApiClient fastApiClient;
 
     public ChatService(
             LearningSourceRepository learningSourceRepository,
             ChatRepository chatRepository,
-            WebClient.Builder webClientBuilder,
-            @Value("${fastapi.base-url}") String fastApiBaseUrl
+            FastApiClient fastApiClient
     ) {
         this.learningSourceRepository = learningSourceRepository;
         this.chatRepository = chatRepository;
-        this.webClient = webClientBuilder.baseUrl(fastApiBaseUrl).build();
-
+        this.fastApiClient = fastApiClient;
     }
-
 
     @Transactional
     public ChatSendResponse sendMessage(Long learningSourceId, Long currentUserId, String userContent) {
@@ -54,7 +50,7 @@ public class ChatService {
 
         Chat userChat = chatRepository.save(Chat.createUserMessage(learningSource, userContent));
 
-        FastApiChatResponse response = callFastApiChat(learningSourceId, userContent);
+        FastApiChatResponse response = fastApiClient.chat(learningSourceId, userContent);
         String answerMd = response.getAnswerMd();
         if (answerMd == null || answerMd.trim().isEmpty()) {
             throw new GeneralException(Code.EXTERNAL_API_ERROR);
@@ -103,31 +99,5 @@ public class ChatService {
                 .chats(chats)
                 .hasNext(slice.hasNext())
                 .build();
-    }
-
-    private FastApiChatResponse callFastApiChat(Long learningSourceId, String question) {
-        try {
-            FastApiChatRequest request = FastApiChatRequest.builder()
-                    .learningSourceId(learningSourceId)
-                    .question(question)
-                    .build();
-
-            FastApiChatResponse response = webClient.post()
-                    .uri("/chat")
-                    .bodyValue(request)
-                    .retrieve()
-                    .bodyToMono(FastApiChatResponse.class)
-                    .timeout(Duration.ofSeconds(15))
-                    .block();
-
-            if (response == null || response.getAnswerMd() == null) {
-                throw new GeneralException(Code.EXTERNAL_API_ERROR);
-            }
-
-            return response;
-
-        } catch (Exception e) {
-            throw new GeneralException(Code.EXTERNAL_API_ERROR);
-        }
     }
 }
