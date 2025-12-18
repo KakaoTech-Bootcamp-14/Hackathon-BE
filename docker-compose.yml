@@ -5,3 +5,5 @@ services:
     container_name: zeusAI-app
     ports:
       - '8080:8080'
+    env_file:
+      - .env

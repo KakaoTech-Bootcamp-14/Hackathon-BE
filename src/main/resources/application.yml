@@ -5,7 +5,7 @@ spring:
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
-    password:
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -14,5 +14,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
 fastapi:
-  base-url: ${FAST_API_URL}
+  base-url: ${FASTAPI_BASE_URL}

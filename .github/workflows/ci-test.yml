@@ -1,4 +1,4 @@
-name: KTB 해커톤 14조 PR CI 파이프라인
+name: KTB 해커톤 ZEUSAI PR CI 파이프라인
 
 on:
   pull_request:
@@ -28,8 +28,8 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}
 
-      - name: 빌드하기
-        run: ./gradlew clean -x test build -Dspring.profiles.active=dev
+      - name: 빌드여부 체크하기
+        run: ./gradlew clean -x test build
 
   notify-discord:
     runs-on: ubuntu-22.04
@@ -40,7 +40,7 @@ jobs:
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_BACK_PR_URL }}
-          title: "${{ needs.build.result == 'success' && '✅' || '❌' }} 새로운 PR이 올라왔습니다!"
+          title: "${{ needs.build.result == 'success' && '✅' || '❌' }} 백엔드 새로운 PR이 올라왔습니다!"
           description: |
             **제목**: ${{ github.event.pull_request.title }}
             **작성자**: ${{ github.event.pull_request.user.login }}
