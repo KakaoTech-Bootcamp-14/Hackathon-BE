@@ -11,4 +11,5 @@ import java.util.List;
 public interface ChapterRepository extends JpaRepository<Chapter, Long> {
         void deleteByLearningSourceId(Long learningSourceId);
         List<Chapter> findAllByLearningSourceId(Long learningSourceId);
+        List<Chapter> findAllByLearningSourceIdIn(List<Long> learningSourceIds);
 }
