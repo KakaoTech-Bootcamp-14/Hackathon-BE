@@ -17,7 +17,7 @@ public class Summary {
     private Task task;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private String content;
 
     @Builder
