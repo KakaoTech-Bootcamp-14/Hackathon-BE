@@ -35,7 +35,7 @@ public class HomeService {
     @Transactional(readOnly = true)
     public HomeResponseDto getHomeData(Long userId) {
 
-        User user = userRepository.findById(1L)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(Code.NOT_FOUND));
 
         // 1. LearningSource 조회
