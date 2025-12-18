@@ -10,12 +10,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "Task API", description = "Task 완료 상태 업데이트 API")
+@Tag(name = "할 일 API", description = "할 일 상태 업데이트 API")
 public interface TaskControllerSpec {
 
     @Operation(
-            summary = "Task 상태 업데이트",
-            description = "Task 상태를 SUCCESS 또는 CANCEL로 동기화합니다."
+            summary = "할 일 상태 업데이트",
+            description = "할 일 상태를 SUCCESS 또는 CANCEL로 동기화합니다."
     )
     ResponseDto updateTaskCompletionStatus(
             @Parameter(description = "Task ID", example = "1")
