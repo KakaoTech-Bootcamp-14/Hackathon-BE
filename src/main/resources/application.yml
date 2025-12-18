@@ -17,3 +17,9 @@ spring:
 
 fastapi:
   base-url: ${FASTAPI_BASE_URL}
+
+cors:
+  front:
+    host: ${FRONT_BASE_URL}
+  back:
+    host: ${BACK_BASE_URL}

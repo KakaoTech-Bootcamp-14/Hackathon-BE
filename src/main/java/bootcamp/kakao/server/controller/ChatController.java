@@ -2,6 +2,7 @@ package bootcamp.kakao.server.controller;
 
 import bootcamp.kakao.server.common.dto.DataResponseDto;
 import bootcamp.kakao.server.common.enums.Code;
+import bootcamp.kakao.server.controller.swagger.ChatControllerSpec;
 import bootcamp.kakao.server.dto.chat.ChatSendRequest;
 import bootcamp.kakao.server.dto.chat.ChatSendResponse;
 import bootcamp.kakao.server.dto.chat.ChatSliceResponse;
@@ -16,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/learning-sources")
-public class ChatController {
+public class ChatController implements ChatControllerSpec {
 
     private final ChatService chatService;
 
