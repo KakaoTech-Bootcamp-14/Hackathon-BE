@@ -24,7 +24,7 @@ public class LearningSourceController implements LearningSourceControllerSpec {
         return new DataResponseDto<>(Code.OK, "학습 자료 상세데이터를 성공적으로 조회하였습니다.", learningSourceResponseDto);
     }
 
-    @PostMapping("/{learningSourceId}/{taskId}/summary")
+    @GetMapping("/{learningSourceId}/{taskId}/summary")
     public DataResponseDto<LearningSourceSummaryResponseDto> getTaskLearningSourceSummary(@PathVariable ("learningSourceId") Long learningSourceId,
                                                                                           @PathVariable ("taskId") Long taskId) {
         LearningSourceSummaryResponseDto taskLearningSourceSummaryResponseDto = learningSourceService.getLearningSourceSummary(learningSourceId, taskId);
@@ -35,14 +35,14 @@ public class LearningSourceController implements LearningSourceControllerSpec {
     public DataResponseDto<LearningSourceSummaryResponseDto> getTaskLearningSourceSummaryFromFastApi(@PathVariable ("learningSourceId") Long learningSourceId,
                                                                                           @PathVariable ("taskId") Long taskId) {
         LearningSourceSummaryResponseDto taskLearningSourceSummaryResponseDto = learningSourceService.getTaskLearningSourceSummaryFromFastApi(learningSourceId, taskId);
-        return new DataResponseDto<>(Code.OK, "학습 자료 요약본을 성공적으로 조회하였습니다.", taskLearningSourceSummaryResponseDto);
+        return new DataResponseDto<>(Code.OK, "학습 자료 요약본을 성공적으로 생성하였습니다.", taskLearningSourceSummaryResponseDto);
     }
 
-    @GetMapping("/{learningSourceId}/progress")
-    public DataResponseDto<ProgressResponseDto> getLearningSourceProgress(@PathVariable ("learningSourceId") Long learningSourceId) {
-        ProgressResponseDto progressResponseDto = learningSourceService.getLearningSourceProgress(learningSourceId);
-        return new DataResponseDto<ProgressResponseDto>(Code.OK, "학습 자료의 진도율을 성공적으로 조회하였습니다.",  progressResponseDto);
-    }
+//    @GetMapping("/{learningSourceId}/progress")
+//    public DataResponseDto<ProgressResponseDto> getLearningSourceProgress(@PathVariable ("learningSourceId") Long learningSourceId) {
+//        ProgressResponseDto progressResponseDto = learningSourceService.getLearningSourceProgress(learningSourceId);
+//        return new DataResponseDto<ProgressResponseDto>(Code.OK, "학습 자료의 진도율을 성공적으로 조회하였습니다.",  progressResponseDto);
+//    }
 
     @DeleteMapping("/{learningSourceId}")
     public ResponseDto deleteLearningSource(@PathVariable("learningSourceId") Long learningSourceId) {

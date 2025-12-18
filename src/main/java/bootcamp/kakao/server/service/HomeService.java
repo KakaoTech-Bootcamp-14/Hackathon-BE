@@ -125,16 +125,16 @@ public class HomeService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
-    public ProgressResponseDto getOverallProgress(Long userId) {
-        long total = taskRepository.countByLearningSourceUserId(userId);
-        long done = taskRepository.countByLearningSourceUserIdAndStatus(userId, TaskStatus.DONE);
-        int progressRate = (total == 0) ? 0 : (int) ((done * 100L) / total);
-
-        return ProgressResponseDto.builder()
-                .totalTaskCount(total)
-                .doneTaskCount(done)
-                .progressRate(progressRate)
-                .build();
-    }
+//    @Transactional(readOnly = true)
+//    public ProgressResponseDto getOverallProgress(Long userId) {
+//        long total = taskRepository.countByLearningSourceUserId(userId);
+//        long done = taskRepository.countByLearningSourceUserIdAndStatus(userId, TaskStatus.DONE);
+//        int progressRate = (total == 0) ? 0 : (int) ((done * 100L) / total);
+//
+//        return ProgressResponseDto.builder()
+//                .totalTaskCount(total)
+//                .doneTaskCount(done)
+//                .progressRate(progressRate)
+//                .build();
+//    }
 }
