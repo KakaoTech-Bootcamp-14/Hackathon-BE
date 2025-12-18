@@ -1,6 +1,7 @@
 package bootcamp.kakao.server.controller;
 
 import bootcamp.kakao.server.common.dto.DataResponseDto;
+import bootcamp.kakao.server.common.dto.ResponseDto;
 import bootcamp.kakao.server.common.enums.Code;
 import bootcamp.kakao.server.controller.swagger.LearningSourceControllerSpec;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceResponseDto;
@@ -34,5 +35,11 @@ public class LearningSourceController implements LearningSourceControllerSpec {
     public DataResponseDto<ProgressResponseDto> getLearningSourceProgress(@PathVariable ("learningSourceId") Long learningSourceId) {
         ProgressResponseDto progressResponseDto = learningSourceService.getLearningSourceProgress(learningSourceId);
         return new DataResponseDto<ProgressResponseDto>(Code.OK, "학습 자료의 진도율을 성공적으로 조회하였습니다.",  progressResponseDto);
+    }
+  
+    @DeleteMapping("/{learningSourceId}")
+    public ResponseDto deleteLearningSource(@PathVariable("learningSourceId") Long learningSourceId) {
+        learningSourceService.deleteLearningSource(learningSourceId);
+        return new ResponseDto(Code.OK.getCode(), "학습 자료가 성공적으로 삭제되었습니다.");
     }
 }

@@ -5,6 +5,7 @@ import bootcamp.kakao.server.common.enums.Code;
 import bootcamp.kakao.server.common.exception.GeneralException;
 import bootcamp.kakao.server.domain.Chapter;
 import bootcamp.kakao.server.domain.LearningSource;
+import bootcamp.kakao.server.domain.StudyPlan;
 import bootcamp.kakao.server.domain.Summary;
 import bootcamp.kakao.server.domain.Task;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceResponseDto;
@@ -14,7 +15,9 @@ import bootcamp.kakao.server.dto.schedule.ChapterInfoDto;
 import bootcamp.kakao.server.dto.schedule.TaskInfoDto;
 import bootcamp.kakao.server.enums.TaskStatus;
 import bootcamp.kakao.server.repository.ChapterRepository;
+import bootcamp.kakao.server.repository.ChatRepository;
 import bootcamp.kakao.server.repository.LearningSourceRepository;
+import bootcamp.kakao.server.repository.StudyPlanRepository;
 import bootcamp.kakao.server.repository.SummaryRepository;
 import bootcamp.kakao.server.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,8 @@ public class LearningSourceService {
     private final LearningSourceRepository learningSourceRepository;
     private final ChapterRepository chapterRepository;
     private final TaskRepository taskRepository;
+    private final StudyPlanRepository studyPlanRepository;
+    private final ChatRepository chatRepository;
     private final FastApiClient fastApiClient;
     private final SummaryRepository summaryRepository;
 
@@ -102,5 +107,40 @@ public class LearningSourceService {
                 .doneTaskCount(done)
                 .progressRate(progressRate)
                 .build();
+    }
+  
+    @Transactional
+    public void deleteLearningSource(Long learningSourceId) {
+        LearningSource learningSource = learningSourceRepository.findById(learningSourceId)
+                .orElseThrow(() -> new GeneralException(Code.NOT_FOUND));
+
+        List<Chapter> chapters = chapterRepository.findAllByLearningSourceId(learningSourceId);
+        if (!chapters.isEmpty()) {
+            List<Long> chapterIds = chapters.stream()
+                    .map(Chapter::getId)
+                    .toList();
+
+            List<Task> tasks = taskRepository.findAllByChapterIdIn(chapterIds);
+            if (!tasks.isEmpty()) {
+                List<Long> taskIds = tasks.stream()
+                        .map(Task::getId)
+                        .toList();
+                List<Summary> summaries = summaryRepository.findAllByTaskIdIn(taskIds);
+                if (!summaries.isEmpty()) {
+                    summaryRepository.deleteAll(summaries);
+                }
+                taskRepository.deleteAll(tasks);
+            }
+
+            chapterRepository.deleteAll(chapters);
+        }
+
+        StudyPlan studyPlan = studyPlanRepository.findByLearningSourceId(learningSourceId);
+        if (studyPlan != null) {
+            studyPlanRepository.delete(studyPlan);
+        }
+
+        chatRepository.deleteByLearningSourceId(learningSourceId);
+        learningSourceRepository.delete(learningSource);
     }
 }

@@ -2,6 +2,7 @@ package bootcamp.kakao.server.controller;
 
 import bootcamp.kakao.server.common.dto.DataResponseDto;
 import bootcamp.kakao.server.common.enums.Code;
+import bootcamp.kakao.server.controller.swagger.HomeControllerSpec;
 import bootcamp.kakao.server.dto.home.HomeResponseDto;
 import bootcamp.kakao.server.dto.learningsource.ProgressResponseDto;
 import bootcamp.kakao.server.service.HomeService;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/home")
 @RequiredArgsConstructor
-public class HomeController {
+public class HomeController implements HomeControllerSpec {
 
     private final HomeService homeService;
 
