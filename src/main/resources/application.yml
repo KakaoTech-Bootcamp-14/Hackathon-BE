@@ -14,3 +14,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+fastapi:
+  base-url: ${FASTAPI_BASE_URL}
