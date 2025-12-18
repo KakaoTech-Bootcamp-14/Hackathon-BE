@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class LearningSourceService {
 
@@ -34,6 +33,7 @@ public class LearningSourceService {
     private final FastApiClient fastApiClient;
     private final SummaryRepository summaryRepository;
 
+    @Transactional(readOnly = true)
     public LearningSourceResponseDto getLearningSourceDetails(Long learningSourceId) {
 
         // 1. LearningSource title 가져오기
@@ -74,6 +74,7 @@ public class LearningSourceService {
                 .build();
     }
 
+    @Transactional
     public LearningSourceSummaryResponseDto getLearningSourceSummary(Long learningSourceId, Long taskId) {
 
         Task task = taskRepository.findById(taskId)
