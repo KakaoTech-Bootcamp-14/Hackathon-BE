@@ -1,5 +1,6 @@
 package bootcamp.kakao.server.dto.task;
 
+import bootcamp.kakao.server.enums.TaskStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TaskCompletionRequestDto {
 
-    private TaskCompletionStatus status;
+    private TaskStatus status;
 }

@@ -10,6 +10,7 @@ import java.util.List;
 @Builder
 public class LearningSourceResponseDto {
 
+    private Long learningSourceId;
     private String learningSourceTitle;
     private List<ChapterInfoDto> chapterInfoDtos;
 

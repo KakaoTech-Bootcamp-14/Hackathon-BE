@@ -23,10 +23,17 @@ public class LearningSourceController implements LearningSourceControllerSpec {
         return new DataResponseDto<>(Code.OK, "학습 자료 상세데이터를 성공적으로 조회하였습니다.", learningSourceResponseDto);
     }
 
-    @PostMapping("/{learningSourceId}/{taskId}/summary")
+    @GetMapping("/{learningSourceId}/{taskId}/summary")
     public DataResponseDto<LearningSourceSummaryResponseDto> getTaskLearningSourceSummary(@PathVariable ("learningSourceId") Long learningSourceId,
                                                                                           @PathVariable ("taskId") Long taskId) {
         LearningSourceSummaryResponseDto taskLearningSourceSummaryResponseDto = learningSourceService.getLearningSourceSummary(learningSourceId, taskId);
+        return new DataResponseDto<>(Code.OK, "학습 자료 요약본을 성공적으로 조회하였습니다.", taskLearningSourceSummaryResponseDto);
+    }
+
+    @PostMapping("/{learningSourceId}/{taskId}/summary")
+    public DataResponseDto<LearningSourceSummaryResponseDto> getTaskLearningSourceSummaryFromFastApi(@PathVariable ("learningSourceId") Long learningSourceId,
+                                                                                          @PathVariable ("taskId") Long taskId) {
+        LearningSourceSummaryResponseDto taskLearningSourceSummaryResponseDto = learningSourceService.getTaskLearningSourceSummaryFromFastApi(learningSourceId, taskId);
         return new DataResponseDto<>(Code.OK, "학습 자료 요약본을 성공적으로 조회하였습니다.", taskLearningSourceSummaryResponseDto);
     }
 

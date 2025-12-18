@@ -12,4 +12,5 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     List<Task> findAllByStudyPlanId(Long studyPlanId);
     List<Task> findAllByChapterIdIn(List<Long> chapterIds);
+    void deleteByChapterIdIn(List<Long> chapterIds);
 }
