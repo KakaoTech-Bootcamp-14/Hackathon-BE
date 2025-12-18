@@ -13,6 +13,9 @@ public class CorsConfig implements WebMvcConfigurer {
     @Value("${cors.front.host}")
     private String frontHost;
 
+    @Value("${fastapi.base-url}")
+    private String aiHost;
+
     @Value("${cors.front.local}")
     private String frontLocal;
 
@@ -25,7 +28,8 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns(
                         frontHost,
                         frontLocal,
-                        backHost
+                        backHost,
+                        aiHost
                 )
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
