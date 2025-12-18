@@ -15,7 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -30,6 +32,9 @@ public class ScheduleService {
     private final FastApiClient fastApiClient;
 
     public CreateScheduleResponseDto createSchedule(MultipartFile multipartFile, CreateScheduleRequestDto createScheduleRequestDto) {
+
+        // chapterTitle 중복 카운트용
+        Map<String, Integer> chapterTitleCountMap = new HashMap<>();
 
         LocalDate startDate = createScheduleRequestDto.getStartDate();
         LocalDate endDate = createScheduleRequestDto.getEndDate();
@@ -73,12 +78,25 @@ public class ScheduleService {
         List<ChapterInfoDto> responseChapters = new ArrayList<>();
         for (FastApiChapterInfoDto fastApiChapterInfoDto : fastApiChapterInfoDtos) {
 
+            String originalTitle = fastApiChapterInfoDto.getChapterTitle();
+
+            // 현재 몇 번째인지 (처음이면 0)
+            int nextCount = chapterTitleCountMap.getOrDefault(originalTitle, 0) + 1;
+
+            // 제목 생성 (무조건 (1)부터)
+            String savedTitle = originalTitle + " (" + nextCount + ")";
+
+            // 카운트 업데이트
+            chapterTitleCountMap.put(originalTitle, nextCount);
+
+
+
             // chapterOrder = Day index
             LocalDate studyDate = studyDates.get(fastApiChapterInfoDto.getChapterOrder() - 1);
 
             Chapter chapter = Chapter.createChapter(
                     fastApiChapterInfoDto.getChapterOrder(),
-                    fastApiChapterInfoDto.getChapterTitle(),
+                    savedTitle,
                     learningSource
             );
 
