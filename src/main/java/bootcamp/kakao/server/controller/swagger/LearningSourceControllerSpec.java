@@ -1,6 +1,7 @@
 package bootcamp.kakao.server.controller.swagger;
 
 import bootcamp.kakao.server.common.dto.DataResponseDto;
+import bootcamp.kakao.server.common.dto.ResponseDto;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceResponseDto;
 import bootcamp.kakao.server.dto.learningsource.LearningSourceSummaryResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,5 +31,14 @@ public interface LearningSourceControllerSpec {
 
             @Parameter(description = "Task ID", example = "1")
             @PathVariable("taskId") Long taskId
+    );
+
+    @Operation(
+            summary = "학습 자료 삭제",
+            description = "학습 자료와 관련된 chat, chapter, study plan, task 데이터를 함께 삭제합니다."
+    )
+    ResponseDto deleteLearningSource(
+            @Parameter(description = "학습 자료 ID", example = "1")
+            @PathVariable("learningSourceId") Long learningSourceId
     );
 }
