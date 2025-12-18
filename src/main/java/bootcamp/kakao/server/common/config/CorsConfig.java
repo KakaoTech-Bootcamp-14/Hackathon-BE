@@ -27,17 +27,10 @@ public class CorsConfig implements WebMvcConfigurer {
                         frontLocal,
                         backHost
                 )
-                .allowedMethods(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "PATCH",
-                        "DELETE",
-                        "OPTIONS"
-                )
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .exposedHeaders("*")
-                .allowCredentials(true)
+                .exposedHeaders("Authorization")
+                .allowCredentials(false)
                 .maxAge(3600);
     }
 }
